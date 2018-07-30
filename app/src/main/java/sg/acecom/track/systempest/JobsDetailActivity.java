@@ -355,7 +355,8 @@ public class JobsDetailActivity extends AppCompatActivity implements View.OnClic
                 break;
 
             case(R.id.buttonBack):
-                onBackPressed();
+                //onBackPressed();
+                backDialog("Alert", "Are you sure you want to exit the job?");
                 break;
 
             case(R.id.buttonReschedule):
@@ -370,15 +371,8 @@ public class JobsDetailActivity extends AppCompatActivity implements View.OnClic
 
             case(R.id.buttonDone):
 
-                Calendar cal = Calendar.getInstance();
-                cal.setTime(Calendar.getInstance().getTime());
-                Date eightHourBack = cal.getTime();
-                String date = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH).format(eightHourBack);
-                String time = new SimpleDateFormat("HHmmss", Locale.ENGLISH).format(eightHourBack);
-                String signature_name = "SIGNATURE_"+ pref.getPreferences("JobID","") + "_" + date + "_" + time;
-                final String Signature_Client_StoredPath = DIRECTORY_CLIENT_SIGNATURE + pref.getPreferences("JobID","") + ".png";
+                completeDialog("Alert", "Are you sure the job has completed?");
 
-                dialogSignature("Client Signature", Signature_Client_StoredPath, DIRECTORY_CLIENT_SIGNATURE);
                 break;
         }
     }
@@ -2771,6 +2765,59 @@ public class JobsDetailActivity extends AppCompatActivity implements View.OnClic
             }
         }.header("Content-Type", "application/x-www-form-urlencoded")
                 .header("_method", "POST"));
+    }
+
+    private void backDialog(final String title, String message){
+        alert_dialog = new AlertDialog.Builder(this);
+        alert_dialog.setCancelable(true);
+        alert_dialog.setTitle(title);
+        alert_dialog.setMessage(message);
+        alert_dialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        alert_dialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(final DialogInterface dialog, int which) {
+                dialog.dismiss();
+                onBackPressed();
+            }
+        });
+        alert_dialog.show();
+
+    }
+
+    private void completeDialog(final String title, String message){
+        alert_dialog = new AlertDialog.Builder(this);
+        alert_dialog.setCancelable(true);
+        alert_dialog.setTitle(title);
+        alert_dialog.setMessage(message);
+        alert_dialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        alert_dialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(final DialogInterface dialog, int which) {
+                dialog.dismiss();
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(Calendar.getInstance().getTime());
+                Date eightHourBack = cal.getTime();
+                String date = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH).format(eightHourBack);
+                String time = new SimpleDateFormat("HHmmss", Locale.ENGLISH).format(eightHourBack);
+                String signature_name = "SIGNATURE_"+ pref.getPreferences("JobID","") + "_" + date + "_" + time;
+                final String Signature_Client_StoredPath = DIRECTORY_CLIENT_SIGNATURE + pref.getPreferences("JobID","") + ".png";
+
+                dialogSignature("Client Signature", Signature_Client_StoredPath, DIRECTORY_CLIENT_SIGNATURE);
+
+            }
+        });
+        alert_dialog.show();
+
     }
 }
 
