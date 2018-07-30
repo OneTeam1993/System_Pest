@@ -95,6 +95,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
+import javax.mail.AuthenticationFailedException;
+import javax.mail.MessagingException;
+
 import sg.acecom.track.systempest.adapter.AocAdapter;
 import sg.acecom.track.systempest.adapter.FindingsAdapter;
 import sg.acecom.track.systempest.adapter.ImageAdapter;
@@ -105,6 +108,7 @@ import sg.acecom.track.systempest.forms.PageHeaderFooterMalaysia;
 import sg.acecom.track.systempest.model.AreaConcerned;
 import sg.acecom.track.systempest.model.Findings;
 import sg.acecom.track.systempest.model.Images;
+import sg.acecom.track.systempest.model.Mail;
 import sg.acecom.track.systempest.model.Pests;
 import sg.acecom.track.systempest.model.Recommendations;
 import sg.acecom.track.systempest.util.AppConstant;
@@ -192,8 +196,8 @@ public class MaintenanceDetailActivity extends AppCompatActivity implements View
     private int PERMISSION_REQUEST_WRITE = 0;
 
     //Signatures
-    final String DIRECTORY_CLIENT_SIGNATURE = Environment.getExternalStorageDirectory().getPath() + "/SystemPest-Client/";
-    final String DIRECTORY_TECHNICIAN_SIGNATURE = Environment.getExternalStorageDirectory().getPath() + "/SystemPest-Technician/";
+    final String DIRECTORY_CLIENT_SIGNATURE = Environment.getExternalStorageDirectory().getPath() + "/SystemPest-MaintenanceClient/";
+    final String DIRECTORY_TECHNICIAN_SIGNATURE = Environment.getExternalStorageDirectory().getPath() + "/SystemPest-MaintenanceTechnician/";
 
     Bitmap bitmap;
     LinearLayout mContent;
@@ -894,7 +898,7 @@ public class MaintenanceDetailActivity extends AppCompatActivity implements View
     private void generatePDF()
     {
         try{
-            File directory = new File(Environment.getExternalStorageDirectory().getPath() + "/SystemPest-Service");
+            File directory = new File(Environment.getExternalStorageDirectory().getPath() + "/SystemPest-MaintenanceService");
             //String bpPath = Environment.getExternalStorageDirectory().getPath() + "/Calpeda-Project/" + pref.getPreferences("ProjectID","");
 
             if(!directory.exists()){
@@ -906,17 +910,17 @@ public class MaintenanceDetailActivity extends AppCompatActivity implements View
 
         try {
 
-            String clientPath = DIRECTORY_CLIENT_SIGNATURE + pref.getPreferences("JobID","") + ".png";
-            String techPath = DIRECTORY_TECHNICIAN_SIGNATURE + pref.getPreferences("JobID","") + ".png";
+            String clientPath = DIRECTORY_CLIENT_SIGNATURE + pref.getPreferences("maintenance_jobID","") + ".png";
+            String techPath = DIRECTORY_TECHNICIAN_SIGNATURE + pref.getPreferences("maintenance_jobID","") + ".png";
 
             Calendar cal = Calendar.getInstance();
             cal.setTime(Calendar.getInstance().getTime());
             //Change Timestamp Timezone
             Date eightHourBack = cal.getTime();
             String timestamp = new SimpleDateFormat("ddMMMyyyy").format(eightHourBack);
-            String filename = pref.getPreferences("JobID","") + "-" + timestamp + ".pdf";
+            String filename = pref.getPreferences("maintenance_jobID","") + "-" + timestamp + ".pdf";
 
-            String mPath = Environment.getExternalStorageDirectory().getPath() + "/SystemPest-Service/"  + "/" + filename;
+            String mPath = Environment.getExternalStorageDirectory().getPath() + "/SystemPest-MaintenanceService/"  + "/" + filename;
             //getting the full path of the PDF report name
             //String mPath = Environment.getExternalStorageDirectory().toString() + "/One.pdf"; //reportName could be any name
 
@@ -968,6 +972,8 @@ public class MaintenanceDetailActivity extends AppCompatActivity implements View
 
             //Closing the document
             document.close();
+            new MaintenanceDetailActivity.uploadServiceForms().execute();
+            sendEmail(mPath);
 
             Log.e("PDF ", "Created...");
         } catch (Exception e) {
@@ -1532,8 +1538,8 @@ public class MaintenanceDetailActivity extends AppCompatActivity implements View
     private void createSignatureArea(Paragraph reportBody)
             throws BadElementException {
 
-        String clientPath = DIRECTORY_CLIENT_SIGNATURE + pref.getPreferences("JobID","") + ".png";
-        String techPath = DIRECTORY_TECHNICIAN_SIGNATURE + pref.getPreferences("JobID","") + ".png";
+        String clientPath = DIRECTORY_CLIENT_SIGNATURE + pref.getPreferences("maintenance_jobID","") + ".png";
+        String techPath = DIRECTORY_TECHNICIAN_SIGNATURE + pref.getPreferences("maintenance_jobID","") + ".png";
 
         float[] columnWidths = {2,2,1,2,2}; //total 4 columns and their width. The first three columns will take the same width and the fourth one will be 5/2.
         PdfPTable table = new PdfPTable(columnWidths);
@@ -1979,9 +1985,11 @@ public class MaintenanceDetailActivity extends AppCompatActivity implements View
 
                     if(k+1 == imagesList.size()){
                         removePreferences();
-                        Intent intent = new Intent(this, MaintenanceActivity.class);
+                       /* Intent intent = new Intent(this, MaintenanceActivity.class);
                         startActivity(intent);
-                        finish();
+                        finish();*/
+
+                       onBackPressed();
                     }
                 }
             }
@@ -2191,8 +2199,8 @@ public class MaintenanceDetailActivity extends AppCompatActivity implements View
                 Date eightHourBack = cal.getTime();
                 String date = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH).format(eightHourBack);
                 String time = new SimpleDateFormat("HHmmss", Locale.ENGLISH).format(eightHourBack);
-                String signature_name = "SIGNATURE_"+ pref.getPreferences("JobID","") + "_" + date + "_" + time;
-                final String Signature_Technician_StoredPath = DIRECTORY_TECHNICIAN_SIGNATURE + pref.getPreferences("JobID","") + ".png";
+                String signature_name = "SIGNATURE_"+ pref.getPreferences("maintenance_jobID","") + "_" + date + "_" + time;
+                final String Signature_Technician_StoredPath = DIRECTORY_TECHNICIAN_SIGNATURE + pref.getPreferences("maintenance_jobID","") + ".png";
 
                 dialogSecondSignature("Technician Signature", Signature_Technician_StoredPath, DIRECTORY_TECHNICIAN_SIGNATURE);
 
@@ -2424,10 +2432,10 @@ public class MaintenanceDetailActivity extends AppCompatActivity implements View
 
                         ftpClient.enterLocalPassiveMode(); // important!
                         ftpClient.setFileType(ftpClient.BINARY_FILE_TYPE);
-                        String path = Environment.getExternalStorageDirectory().getPath() + "/SystemPest-Client/" + pref.getPreferences("JobID","") + ".png";
+                        String path = Environment.getExternalStorageDirectory().getPath() + "/SystemPest-MaintenanceClient/" + pref.getPreferences("maintenance_jobID","") + ".png";
 
                         FileInputStream in = new FileInputStream(new File(path));
-                        boolean result = ftpClient.storeFile("/"+ pref.getPreferences("JobID","") +".png", in);
+                        boolean result = ftpClient.storeFile("/"+ pref.getPreferences("maintenance_jobID","") +".png", in);
                         in.close();
                         if (result) Log.v("upload result", "succeeded");
                         ftpClient.logout();
@@ -2489,10 +2497,10 @@ public class MaintenanceDetailActivity extends AppCompatActivity implements View
 
                         ftpClient.enterLocalPassiveMode(); // important!
                         ftpClient.setFileType(ftpClient.BINARY_FILE_TYPE);
-                        String path = Environment.getExternalStorageDirectory().getPath() + "/SystemPest-Technician/" + pref.getPreferences("JobID","") + ".png";
+                        String path = Environment.getExternalStorageDirectory().getPath() + "/SystemPest-MaintenanceTechnician/" + pref.getPreferences("maintenance_jobID","") + ".png";
 
                         FileInputStream in = new FileInputStream(new File(path));
-                        boolean result = ftpClient.storeFile("/"+ pref.getPreferences("JobID","") +".png", in);
+                        boolean result = ftpClient.storeFile("/"+ pref.getPreferences("maintenance_jobID","") +".png", in);
                         in.close();
                         if (result) Log.v("upload result", "succeeded");
                         ftpClient.logout();
@@ -2618,6 +2626,54 @@ public class MaintenanceDetailActivity extends AppCompatActivity implements View
 
         // Access the RequestQueue through your singleton class.
         AppController.getInstance().addToRequestQueue(getRequest);
+    }
+
+    private void sendEmail(String attachment) {
+        String sender_address = "";
+        String sender_password = "";
+        String[] recipients = { "ljmmagi@gmail.com" };
+        SendMaintenanceEmailAsyncTask email = new SendMaintenanceEmailAsyncTask();
+        email.activity = this;
+
+        StringBuilder emailBody = new StringBuilder();
+
+        emailBody.append("Dear Customer, ");
+        emailBody.append("\n");
+        emailBody.append("\n");
+        emailBody.append("Your job has been completed by SystemPest Engineer, Kindly view the attachment file for the reports. ");
+        emailBody.append("\n");
+        emailBody.append("Please do not reply this email. ");
+
+        if(pref.getPreferences("maintenance_CompanyID","").equals("1")){
+            sender_address = "system.sg.report@gmail.com";
+            sender_password = "qwepoi78";
+        }else if(pref.getPreferences("maintenance_CompanyID","").equals("2")){
+            sender_address = "system.my.report@gmail.com";
+            sender_password = "qwepoi78";
+        }else if(pref.getPreferences("maintenance_CompanyID","").equals("3")){
+            sender_address = "asiawhiteant.report@gmail.com";
+            sender_password = "qwepoi78";
+        }else{
+            sender_address = "system.sg.report@gmail.com";
+            sender_password = "qwepoi78";
+        }
+        email.m = new Mail(sender_address, sender_password);
+        email.m.set_from(sender_address);
+        email.m.setBody(emailBody.toString());
+        email.m.set_to(recipients);
+        email.m.set_subject("Do not reply this message");
+        try {
+            email.m.addAttachment(attachment);
+        } catch (Exception e) {
+            Log.e("Attachment Failed : ", String.valueOf(e));
+            e.printStackTrace();
+        }
+        /*try {
+            email.m.addAttachment(FILE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }*/
+        email.execute();
     }
 
     private void datePickerDialog(){
@@ -2823,4 +2879,111 @@ public class MaintenanceDetailActivity extends AppCompatActivity implements View
         }.header("Content-Type", "application/x-www-form-urlencoded")
                 .header("_method", "POST"));
     }
+
+    public class uploadServiceForms extends AsyncTask<String, Void, Long> {
+
+        protected Long doInBackground(String... FULL_PATH_TO_LOCAL_FILE) {
+            {
+                FTPClient ftpClient = new FTPClient();
+                int reply;
+
+                String servername = AppConstant.ads_host;
+                int port = 21;
+                String user = "SystemPest_Forms";
+                String pass = "trackacecom";
+                try {
+                    Log.e("START :", "UPLOADING");
+                    //System.out.println("Entered Data Upload loop!");
+                    ftpClient.connect(servername, 21);
+                    ftpClient.login(user, pass);
+                    ftpClient.sendCommand("Enter FTP Server");
+                    ftpClient.changeWorkingDirectory("/");
+
+                    reply = ftpClient.getReplyCode();
+
+                    if (FTPReply.isPositiveCompletion(reply)) {
+                        System.out.println("Connected Success");
+                    } else {
+                        System.out.println("Connection Failed");
+                        ftpClient.disconnect();
+                    }
+
+                    try
+                    {
+                        Log.e("PROCEEDING :", "UPLOADING");
+
+                        ftpClient.enterLocalPassiveMode(); // important!
+                        ftpClient.setFileType(ftpClient.BINARY_FILE_TYPE);
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(Calendar.getInstance().getTime());
+                        //Change Timestamp Timezone
+                        Date eightHourBack = cal.getTime();
+                        String timestamp = new SimpleDateFormat("ddMMMyyyy").format(eightHourBack);
+                        String filename = pref.getPreferences("maintenance_jobID","") + "-" + timestamp + ".pdf";
+                        String mPath = Environment.getExternalStorageDirectory().getPath() + "/SystemPest-MaintenanceService/"  + "/" + filename;
+
+                        FileInputStream in = new FileInputStream(new File(mPath));
+                        boolean result = ftpClient.storeFile("/"+ pref.getPreferences("maintenance_jobID","") +".png", in);
+                        in.close();
+                        if (result) Log.v("upload result", "succeeded");
+                        ftpClient.logout();
+                        ftpClient.disconnect();
+                        //File file = new File(path);
+                        //boolean deleted = file.delete();
+                    }
+                    catch (Exception e)
+                    {
+                        Log.e("Upload Failed : ", String.valueOf(e));
+                        e.printStackTrace();
+                    }
+
+                } catch (SocketException e) {
+                    Log.e("FTP", e.getStackTrace().toString());
+                    //System.out.println("Socket Exception!");
+                } catch (UnknownHostException e) {
+                    Log.e("FTP", e.getStackTrace().toString());
+                } catch (IOException e) {
+                    Log.e("FTP", e.getStackTrace().toString());
+                    //System.out.println("IO Exception!");
+                }
+                return null;
+            }
+        }
+    }
+
+}
+
+class SendMaintenanceEmailAsyncTask extends AsyncTask<Void, Void, Boolean> {
+    Mail m;
+    MaintenanceDetailActivity activity;
+
+    public SendMaintenanceEmailAsyncTask() {
+    }
+
+    @Override
+    protected Boolean doInBackground(Void... params) {
+        try {
+            if (m.send()) {
+                Log.e("Mail : ", "Email sent...");
+            } else {
+                Log.e("Mail : ", "Email failed to send...");
+            }
+
+            return true;
+        } catch (AuthenticationFailedException e) {
+            Log.e(SendEmailAsyncTask.class.getName(), "Bad account details");
+            Log.e("Authentication", String.valueOf(e));
+            e.printStackTrace();
+            return false;
+        } catch (MessagingException e) {
+            Log.e("Messaging Exception", String.valueOf(e));
+            e.printStackTrace();
+            return false;
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e("Exception", String.valueOf(e));
+            return false;
+        }
+    }
+
 }

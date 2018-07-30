@@ -175,7 +175,9 @@ public class MaintenanceFragment extends Fragment implements SwipeRefreshLayout.
                                 JSONObject objectAc = obj.getJSONObject("AcInfo");
                                 maintenance.setAreaCovered(objectAc.getString("GeneralLocation"));
 
-                                maintenanceList.add(maintenance);
+                                if(maintenanceJob.getInt("Flag") != 0){
+                                    maintenanceList.add(maintenance);
+                                }
                             }
 
                            // adapter.notifyDataSetChanged();
