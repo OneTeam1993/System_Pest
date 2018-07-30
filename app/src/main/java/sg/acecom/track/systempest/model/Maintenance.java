@@ -25,6 +25,15 @@ public class Maintenance {
     int CompanyID;
     int MaintenanceJobID;
     String AreaCovered;
+    String ReferenceNo;
+
+    public String getReferenceNo() {
+        return ReferenceNo;
+    }
+
+    public void setReferenceNo(String referenceNo) {
+        ReferenceNo = referenceNo;
+    }
 
     public String getAreaCovered() {
         return AreaCovered;

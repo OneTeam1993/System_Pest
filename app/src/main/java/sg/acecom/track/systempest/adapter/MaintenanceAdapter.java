@@ -129,6 +129,7 @@ public class MaintenanceAdapter extends RecyclerView.Adapter<MaintenanceAdapter.
                 pref.savePreferences("maintenance_NextJobDate", convertDate(maintenance.getNextJobDate()));
                 pref.savePreferences("maintenance_jobID", String.valueOf(maintenance.getMaintenanceJobID()));
                 pref.savePreferences("maintenance_AreaCovered", String.valueOf(maintenance.getAreaCovered()));
+                pref.savePreferences("maintenance_jobReferenceNo", String.valueOf(maintenance.getReferenceNo()));
 
 
                 Intent intent = new Intent(mContext, MaintenanceDetailActivity.class);

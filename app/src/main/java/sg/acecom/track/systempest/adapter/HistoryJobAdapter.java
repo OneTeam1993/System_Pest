@@ -57,6 +57,7 @@ public class HistoryJobAdapter extends RecyclerView.Adapter<HistoryJobAdapter.My
                 @Override
                 public void onClick(View view) {
                     // send selected contact in callback
+
                     listener.onHistoryJobSelected(jobsListFiltered.get(getAdapterPosition()));
                 }
             });

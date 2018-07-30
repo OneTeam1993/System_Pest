@@ -52,6 +52,7 @@ import sg.acecom.track.systempest.util.MyPreferences;
 
 public class HistoryDetailActivity extends AppCompatActivity implements View.OnClickListener{
 
+    private TextView jobReference;
     private TextView cusName;
     private TextView cusEmail;
     private TextView jobDateTime;
@@ -87,6 +88,7 @@ public class HistoryDetailActivity extends AppCompatActivity implements View.OnC
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         pref = new MyPreferences(this);
+        jobReference = findViewById( R.id.jobReference );
         cusName = findViewById( R.id.cusName );
         cusEmail = findViewById( R.id.cusEmail );
         jobDateTime = findViewById( R.id.jobDateTime );
@@ -203,6 +205,7 @@ public class HistoryDetailActivity extends AppCompatActivity implements View.OnC
                             jobNewAmount.setText(response.getString("ReceivedAmount"));
                             jobRemarks.setText(response.getString("Remarks"));
                             jobRecommendation.setText(response.getString("Recommendations"));
+                            jobReference.setText(pref.getPreferences("history_jobReference",""));
                             radioCash.setEnabled(false);
                             radioCheque.setEnabled(false);
 

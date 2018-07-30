@@ -181,6 +181,7 @@ public class HistoryActivity extends AppCompatActivity implements HistoryJobAdap
                                     job.setReceipt(obj.getString("Receipt"));
                                     job.setImage(obj.getString("Image"));
                                     job.setImageFill(obj.getString("ImageFill"));
+                                    job.setReferenceNo(obj.getString("ReferenceNo"));
 
                                     JSONArray arrayPest = obj.getJSONArray("Pest");
                                     StringBuilder pestBuilder = new StringBuilder();
@@ -310,6 +311,7 @@ public class HistoryActivity extends AppCompatActivity implements HistoryJobAdap
     @Override
     public void onHistoryJobSelected(Jobs jobs) {
 
+        pref.savePreferences("history_jobReference","");
         pref.savePreferences("history_jobID", String.valueOf(jobs.getJobID()));
         Intent intent = new Intent(this, HistoryDetailActivity.class);
         startActivity(intent);

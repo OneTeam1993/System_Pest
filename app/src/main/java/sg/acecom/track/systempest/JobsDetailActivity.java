@@ -2685,11 +2685,11 @@ public class JobsDetailActivity extends AppCompatActivity implements View.OnClic
             params.put("Destination", pref.getPreferences("Destination",""));
             params.put("Phone", pref.getPreferences("Phone",""));
             params.put("Unit", pref.getPreferences("Unit",""));
-            params.put("Flag", 0);
+            params.put("Flag", 2);
             params.put("Remarks", pref.getPreferences("Remarks",""));
             params.put("Receipt", pref.getPreferences("Receipt",""));
             params.put("UserID", 0);
-            params.put("DriverID", 0);
+            params.put("DriverID", pref.getPreferences("driver_id",""));
             params.put("Postal", pref.getPreferences("Postal",""));
             params.put("CusEmail", pref.getPreferences("CusEmail",""));
             params.put("Site", pref.getPreferences("Site",""));
