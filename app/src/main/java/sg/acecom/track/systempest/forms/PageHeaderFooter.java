@@ -46,6 +46,11 @@ public class PageHeaderFooter extends PdfPageEventHelper {
     String technician_signature_path;
     String address_information = "10, Ubi Crescent, #06-81, Ubi Tech Park, Singapore 408564.  Tel: 6748 8966 (4 lines)  Fax: 6749 8966";
     String contact_information = "Email: singapore@systempest.com  Website: www.systempest.com";
+
+    String address_whiteant_information = "Blk 30 Defu Lane 10 # 03-76 Singapore 539211.";
+    String contact_whiteant_information_1 = "Tel : 6841 2023 (2 lines) Fax : 6280 9538";
+    String contact_whiteant_information_2 = "Email: enquiries@asiawhiteant.com.sg  Website: www.asiawhiteant.com.sg";
+
     String johor_address = "62, Jalan Lembah 1, Taman Desa Jaya, 81100 Johor Bahru, Malaysia";
     String johor_information = "Tel: +607-353 3266 Fax: +607-351 5616  Email: johor@systempest.com";
     String selangor_address = "93-2, Jalan 3/23A, Danau Kota, Setapak, 53300 Kuala Lumpur, Malaysia";
@@ -60,11 +65,13 @@ public class PageHeaderFooter extends PdfPageEventHelper {
     String singapore_hq_information = "Tel: +65 6748 8966 Fax: +65 6749 8966";
     String singapore_branch_address = "Block 30, Defu Lane 10, #03-75, Singapore 539211";
     String singapore_branch_information = "Tel: +65-6283 6366 Fax: +65-67498966  Email: singapore@systempest.com";
-    public PageHeaderFooter(Context context, String projectName, String client_signature_path, String technician_signature_path) {
+    int company_id;
+    public PageHeaderFooter(Context context, String projectName, String client_signature_path, String technician_signature_path, int company_id) {
         this.context = context;
         this.projectName = projectName;
         this.client_signature_path = client_signature_path;
         this.technician_signature_path = technician_signature_path;
+        this.company_id = company_id;
     }
 
 
@@ -121,28 +128,65 @@ public class PageHeaderFooter extends PdfPageEventHelper {
             header.setTotalWidth(document.right() - document.left());
             header.getDefaultCell().setBorderWidth(0f);
 
-            d = context.getResources().getDrawable (R.drawable.formsg_systempestlogo);
-            bitmap = ((BitmapDrawable)d).getBitmap();
-            stream = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 30, stream);
-            bitmapData = stream.toByteArray();
-            image = Image.getInstance(bitmapData);
-            image.scaleAbsolute(310f, 50f);
-            cell.setBorder(Rectangle.NO_BORDER);
-            cell = new PdfPCell(image);
-            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-            cell.setBorder(Rectangle.NO_BORDER);
-            header.addCell(cell);
+            if(company_id == 1){
+                d = context.getResources().getDrawable (R.drawable.formsg_systempestlogo);
+                bitmap = ((BitmapDrawable)d).getBitmap();
+                stream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 30, stream);
+                bitmapData = stream.toByteArray();
+                image = Image.getInstance(bitmapData);
+                image.scaleAbsolute(310f, 50f);
+                cell.setBorder(Rectangle.NO_BORDER);
+                cell = new PdfPCell(image);
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                cell.setBorder(Rectangle.NO_BORDER);
+                header.addCell(cell);
 
-            cell = new PdfPCell(new Phrase("Ministry of Environment License No.: 199804 - ENV199004930W", FontFactory.getFont(FontFactory.HELVETICA,8, Font.ITALIC)));
-            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-            cell.setBorder(Rectangle.NO_BORDER);
-            header.addCell(cell);
+                cell = new PdfPCell(new Phrase("Ministry of Environment License No.: 199804 - ENV199004930W", FontFactory.getFont(FontFactory.HELVETICA,8, Font.ITALIC)));
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                cell.setBorder(Rectangle.NO_BORDER);
+                header.addCell(cell);
 
-            cell = new PdfPCell(new Phrase("Co. Reg. No.: 199004930W  GST No.: M2-0095877-2", FontFactory.getFont(FontFactory.HELVETICA,8, Font.BOLD)));
-            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-            cell.setBorder(Rectangle.NO_BORDER);
-            header.addCell(cell);
+                cell = new PdfPCell(new Phrase("Co. Reg. No.: 199004930W  GST No.: M2-0095877-2", FontFactory.getFont(FontFactory.HELVETICA,8, Font.BOLD)));
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                cell.setBorder(Rectangle.NO_BORDER);
+                header.addCell(cell);
+            }else {
+                d = context.getResources().getDrawable (R.drawable.formmy_asiawhiteantlogo);
+                bitmap = ((BitmapDrawable)d).getBitmap();
+                stream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 30, stream);
+                bitmapData = stream.toByteArray();
+                image = Image.getInstance(bitmapData);
+                image.scaleAbsolute(310f, 50f);
+                cell.setBorder(Rectangle.NO_BORDER);
+                cell = new PdfPCell(image);
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                cell.setBorder(Rectangle.NO_BORDER);
+                header.addCell(cell);
+
+                cell = new PdfPCell(new Phrase(address_whiteant_information, FontFactory.getFont(FontFactory.HELVETICA,8, Font.NORMAL)));
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                cell.setBorder(Rectangle.NO_BORDER);
+                header.addCell(cell);
+
+                cell = new PdfPCell(new Phrase(contact_whiteant_information_1, FontFactory.getFont(FontFactory.HELVETICA,8, Font.NORMAL)));
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                cell.setBorder(Rectangle.NO_BORDER);
+                header.addCell(cell);
+
+                cell = new PdfPCell(new Phrase(contact_whiteant_information_2, FontFactory.getFont(FontFactory.HELVETICA,8, Font.NORMAL)));
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                cell.setBorder(Rectangle.NO_BORDER);
+                header.addCell(cell);
+
+                cell = new PdfPCell(new Phrase("REG No : 200101970W", FontFactory.getFont(FontFactory.HELVETICA,8, Font.BOLD)));
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                cell.setBorder(Rectangle.NO_BORDER);
+                header.addCell(cell);
+            }
+
+
 
             // write content
             header.writeSelectedRows(0, -1, 34, 820, writer.getDirectContent());
@@ -356,19 +400,21 @@ public class PageHeaderFooter extends PdfPageEventHelper {
 //        cell.setBorder(Rectangle.NO_BORDER);
 //        footer.addCell(cell);
 
-        cell = new PdfPCell(new Phrase(address_information, FontFactory.getFont(FontFactory.HELVETICA,8, Font.NORMAL)));
-        cell.setBorder(Rectangle.NO_BORDER);
-        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-        cell.setPaddingTop(5);
-        cell.setColspan(7);
-        footer.addCell(cell);
+        if(company_id == 1){
+            cell = new PdfPCell(new Phrase(address_information, FontFactory.getFont(FontFactory.HELVETICA,8, Font.NORMAL)));
+            cell.setBorder(Rectangle.NO_BORDER);
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            cell.setPaddingTop(5);
+            cell.setColspan(7);
+            footer.addCell(cell);
 
-        cell = new PdfPCell(new Phrase(contact_information, FontFactory.getFont(FontFactory.HELVETICA,8, Font.NORMAL)));
-        cell.setBorder(Rectangle.NO_BORDER);
-        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-        cell.setColspan(7);
-        footer.addCell(cell);
-
+            cell = new PdfPCell(new Phrase(contact_information, FontFactory.getFont(FontFactory.HELVETICA,8, Font.NORMAL)));
+            cell.setBorder(Rectangle.NO_BORDER);
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            cell.setColspan(7);
+            footer.addCell(cell);
+        }
+        
         // write content
         footer.writeSelectedRows(0, -1, 36, 170, writer.getDirectContent());
     }

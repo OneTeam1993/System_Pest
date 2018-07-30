@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -46,6 +47,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -92,6 +94,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
@@ -131,6 +134,7 @@ public class JobsDetailActivity extends AppCompatActivity implements View.OnClic
     private TextView jobAmount;
     private EditText jobNewAmount;
     private Button buttonCalender;
+    private Button buttonReschedule;
     private RecyclerView recyclerTreatment;
     private RecyclerView recyclerAreaConcerned;
     private FloatingActionButton fabAreaConcerned;
@@ -208,6 +212,10 @@ public class JobsDetailActivity extends AppCompatActivity implements View.OnClic
     View view_tech;
     signature_tech mSignature_tech;
 
+    private int mYear, mMonth, mDay, mHour, mMinute;
+    private String scheduledDate, scheduledTime;
+
+    AlertDialog.Builder alert_dialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -237,6 +245,7 @@ public class JobsDetailActivity extends AppCompatActivity implements View.OnClic
         jobAmount = findViewById( R.id.jobAmount );
         jobNewAmount = findViewById( R.id.jobNewAmount );
         buttonCalender = findViewById( R.id.buttonCalender );
+        buttonReschedule = findViewById( R.id.buttonReschedule );
         recyclerTreatment = findViewById( R.id.recyclerTreatment );
         recyclerAreaConcerned = findViewById( R.id.recyclerAreaConcerned );
         recyclerImages = findViewById( R.id.recyclerImages );
@@ -292,6 +301,7 @@ public class JobsDetailActivity extends AppCompatActivity implements View.OnClic
         buttonBack.setOnClickListener( this );
         buttonRoute.setOnClickListener( this );
         buttonDone.setOnClickListener( this );
+        buttonReschedule.setOnClickListener( this );
 
         initContent();
 
@@ -346,6 +356,10 @@ public class JobsDetailActivity extends AppCompatActivity implements View.OnClic
 
             case(R.id.buttonBack):
                 onBackPressed();
+                break;
+
+            case(R.id.buttonReschedule):
+                datePickerDialog();
                 break;
 
             case(R.id.buttonRoute):
@@ -834,23 +848,28 @@ public class JobsDetailActivity extends AppCompatActivity implements View.OnClic
             //assigning a PdfWriter instance to pdfWriter
 
             //PageFooter is an inner class of this class which is responsible to create Header and Footer
-            if(pref.getPreferences("driver_company_id","").equals("1")){
+            if(pref.getPreferences("AssetCompanyID","").equals("1")){
                 document = new Document(PageSize.A4, 36, 36, 130, 150);
                 pdfWriter = PdfWriter.getInstance(document, new FileOutputStream(pdfFile));
-                PageHeaderFooter event = new PageHeaderFooter(this, "System Pest Service Order", clientPath, techPath);
+                PageHeaderFooter event = new PageHeaderFooter(this, "SystemPest Service Order", clientPath, techPath , Integer.parseInt(pref.getPreferences("AssetCompanyID","")));
                 pdfWriter.setPageEvent(event);
-            }else if(pref.getPreferences("driver_company_id","").equals("2")){
+            }else if(pref.getPreferences("AssetCompanyID","").equals("2")){
                 document = new Document(PageSize.A4, 36, 36, 130, 250);
 
                 pdfWriter = PdfWriter.getInstance(document, new FileOutputStream(pdfFile));
 
-                PageHeaderFooterMalaysia event = new PageHeaderFooterMalaysia(this, "System Pest Service Order", clientPath, techPath);
+                PageHeaderFooterMalaysia event = new PageHeaderFooterMalaysia(this, "SystemPest Malaysia Service Order", clientPath, techPath);
+                pdfWriter.setPageEvent(event);
+            }else if(pref.getPreferences("AssetCompanyID","").equals("3")){
+                document = new Document(PageSize.A4, 36, 36, 130, 150);
+                pdfWriter = PdfWriter.getInstance(document, new FileOutputStream(pdfFile));
+
+                PageHeaderFooter event = new PageHeaderFooter(this, "Asia White Ant Service Order", clientPath, techPath,  Integer.parseInt(pref.getPreferences("AssetCompanyID","")));
                 pdfWriter.setPageEvent(event);
             }else{
                 document = new Document(PageSize.A4, 36, 36, 130, 150);
                 pdfWriter = PdfWriter.getInstance(document, new FileOutputStream(pdfFile));
-
-                PageHeaderFooter event = new PageHeaderFooter(this, "System Pest Service Order", clientPath, techPath);
+                PageHeaderFooter event = new PageHeaderFooter(this, "SystemPest Service Order", clientPath, techPath , Integer.parseInt(pref.getPreferences("AssetCompanyID","")));
                 pdfWriter.setPageEvent(event);
             }
 
@@ -2550,6 +2569,209 @@ public class JobsDetailActivity extends AppCompatActivity implements View.OnClic
         email.execute();
     }
 
+    private void datePickerDialog(){
+        // Get Current Date
+        final Calendar c = Calendar.getInstance();
+        mYear = c.get(Calendar.YEAR);
+        mMonth = c.get(Calendar.MONTH);
+        mDay = c.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(this,
+                new DatePickerDialog.OnDateSetListener() {
+
+                    @Override
+                    public void onDateSet(DatePicker view, int year,
+                                          int monthOfYear, int dayOfMonth) {
+
+                        scheduledDate = dayOfMonth + "-" + (monthOfYear + 1) + "-" + year;
+                        Log.e("Scheduled Date : ", scheduledDate);
+                        timePickerDialog();
+
+                    }
+                }, mYear, mMonth, mDay);
+        datePickerDialog.show();
+    }
+
+    private void timePickerDialog(){
+        // Get Current Time
+        final Calendar c = Calendar.getInstance();
+        mHour = c.get(Calendar.HOUR_OF_DAY);
+        mMinute = c.get(Calendar.MINUTE);
+
+        // Launch Time Picker Dialog
+        TimePickerDialog timePickerDialog = new TimePickerDialog(this,
+                new TimePickerDialog.OnTimeSetListener() {
+
+                    @Override
+                    public void onTimeSet(TimePicker view, int hourOfDay,
+                                          int minute) {
+
+                        scheduledTime = hourOfDay + ":" + minute;
+                        Log.e("Scheduled Time : ", scheduledTime);
+
+
+                        Log.e("Scheduled Date Time : ", scheduledDate + " " + scheduledTime);
+                        rescheduledDialog(scheduledDate + " " + scheduledTime);
+                    }
+                }, mHour, mMinute, false);
+        timePickerDialog.show();
+    }
+
+    private void rescheduledDialog(final String rescheduledDateTime){
+        alert_dialog = new AlertDialog.Builder(this);
+        alert_dialog.setCancelable(true);
+        alert_dialog.setTitle("Reschedule Date");
+        alert_dialog.setMessage("Date Selected : " + rescheduledDateTime);
+        alert_dialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        alert_dialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(final DialogInterface dialog, int which) {
+                createNewScheduledJob(rescheduledDateTime);
+                dialog.dismiss();
+            }
+        });
+        alert_dialog.show();
+
+    }
+
+    private void createNewScheduledJob(String scheduledDate){
+
+        //JN-270718-763
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(Calendar.getInstance().getTime());
+        cal.add(Calendar.HOUR, -8);
+        Date eightHourBack = cal.getTime();
+        String dateRange = new SimpleDateFormat("ddmmyy", Locale.ENGLISH).format(eightHourBack);
+
+        Random random = new Random();
+        int x = random.nextInt(900) + 100;
+        String randomNumber = String.valueOf(x);
+        if(randomNumber.length() == 1){
+            randomNumber = "00" + randomNumber;
+        }else if(randomNumber.length() == 2){
+            randomNumber = "0" + randomNumber;
+        }
+
+        String jobnumber = "JN-" + dateRange + "-" + randomNumber;
+
+        SimpleDateFormat sdf = new SimpleDateFormat("d-m-yyyy", Locale.ENGLISH);
+        SimpleDateFormat output = new SimpleDateFormat("dd-MMM-yyyy hh:mm:ss",Locale.ENGLISH);
+        Date d = null;
+        Date utcDate = null;
+        String finalDate = "";
+        try {
+            d = sdf.parse(scheduledDate);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(d);
+            calendar.add(Calendar.HOUR, 8);
+            utcDate = calendar.getTime();
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        finalDate = output.format(eightHourBack);
+
+        JSONObject params = new JSONObject();
+        try {
+            params.put("JobNumber", jobnumber);
+            params.put("Company", pref.getPreferences("Company",""));
+            params.put("AssetID", pref.getPreferences("driver_assets_id",""));
+            params.put("AssetCompanyID", pref.getPreferences("AssetCompanyID",""));
+            params.put("AssetResellerID", pref.getPreferences("AssetResellerID",""));
+            params.put("Timestamp", finalDate);
+            params.put("RxTime", finalDate);
+            params.put("Amount", pref.getPreferences("Amount",""));
+            params.put("PIC", pref.getPreferences("PIC",""));
+            params.put("Destination", pref.getPreferences("Destination",""));
+            params.put("Phone", pref.getPreferences("Phone",""));
+            params.put("Unit", pref.getPreferences("Unit",""));
+            params.put("Flag", 0);
+            params.put("Remarks", pref.getPreferences("Remarks",""));
+            params.put("Receipt", pref.getPreferences("Receipt",""));
+            params.put("UserID", 0);
+            params.put("DriverID", 0);
+            params.put("Postal", pref.getPreferences("Postal",""));
+            params.put("CusEmail", pref.getPreferences("CusEmail",""));
+            params.put("Site", pref.getPreferences("Site",""));
+            params.put("ReferenceNo", pref.getPreferences("jobReferenceNo",""));
+
+
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+        }
+
+        final String url = AppConstant.endpoint_url + "jobinfo";
+
+        System.out.println(url);
+
+        AQuery aq = new AQuery(this);
+        aq.post(url, params, String.class, new AjaxCallback<String>() {
+            @Override
+            public void callback(String url, String response, AjaxStatus status) {
+                System.out.println(response);
+                if (status.getMessage().equals("OK")) {
+                    try {
+                        JSONObject obj = new JSONObject(response);
+
+                        Log.e("Response : ", obj.getString("JobID"));
+                        int item_no = 1;
+                        for(int j = 0; j < pestsList.size(); j++){
+                            uploadPestTreatment(obj.getInt("JobID"), item_no,
+                                    pestsList.get(j).getPestDesc(), pestsList.get(j).getTreatmentDesc());
+
+                            item_no++;
+                        }
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }
+        }.header("Content-Type", "application/x-www-form-urlencoded")
+                .header("_method", "POST"));
+    }
+
+    private void uploadPestTreatment(int jobID, int itemNo, String pestDesc, String treatmentDesc){
+        JSONObject params = new JSONObject();
+        try {
+            params.put("JobID", jobID);
+            params.put("ItemNo", itemNo);
+            params.put("PestDesc", pestDesc);
+            params.put("TreatmentDesc", treatmentDesc);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+        }
+
+        final String url = AppConstant.endpoint_url + "pesttreatmentinfo";
+
+        System.out.println(url);
+
+        AQuery aq = new AQuery(this);
+        aq.post(url, params, String.class, new AjaxCallback<String>() {
+            @Override
+            public void callback(String url, String response, AjaxStatus status) {
+                System.out.println(response);
+                if (status.getMessage().equals("OK")) {
+
+
+                }
+            }
+        }.header("Content-Type", "application/x-www-form-urlencoded")
+                .header("_method", "POST"));
+    }
 }
 
 class SendEmailAsyncTask extends AsyncTask<Void, Void, Boolean> {
