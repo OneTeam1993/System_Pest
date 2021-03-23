@@ -82,6 +82,15 @@
                 android:textColor="@color/white"
                 android:buttonTint="@color/white"/>
 
+
+            <Spinner
+                android:id="@+id/spinCompanyName"
+                android:layout_width="fill_parent"
+                android:layout_height="50dp"
+                android:background="@color/white">
+
+            </Spinner>
+
             <!-- Login Button -->
             <Button
                 android:id="@+id/buttonLogin"
@@ -95,5 +104,13 @@
 
         </LinearLayout>
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/textVersion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:gravity="center"
+        android:textColor="@color/white"/>
 
 </RelativeLayout>
